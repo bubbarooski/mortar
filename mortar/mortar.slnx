@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="mortar.csproj">
+    <Deploy />
+  </Project>
+</Solution>
