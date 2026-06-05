@@ -16,19 +16,19 @@ namespace mortar
     /// </para>
     /// </remarks>
     [Guid("8ab0fe32-6cbd-41c1-a370-891f44b6d0ef")]
-    public class DocLinkerWindow : ToolWindowPane
+    public class mortarWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocLinkerWindow"/> class.
+        /// Initializes a new instance of the <see cref="mortarWindow"/> class.
         /// </summary>
-        public DocLinkerWindow() : base(null)
+        public mortarWindow() : base(null)
         {
-            this.Caption = "DocLinkerWindow";
+            this.Caption = "mortar: a file linking plugin";
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
-            this.Content = new DocLinkerWindowControl();
+            this.Content = new mortarWindowControl();
         }
     }
 }

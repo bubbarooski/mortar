@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="mortar.DocLinkerWindowControl"
+﻿<UserControl x:Class="mortar.mortarWindowControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,9 +10,9 @@
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Center">DocLinkerWindow</TextBlock>
-            <Button Content="Click me!" Click="button1_Click" Width="120" Height="80" Name="button1"/>
+        <StackPanel Margin="10">
+            <TextBlock Text="File name" FontSize="16" FontWeight="Bold" Margin="0, 0, 0, 10"/>
+            <TextBlock Text="No files linked yet." Name="statusText" />
         </StackPanel>
     </Grid>
 </UserControl>

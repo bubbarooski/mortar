@@ -34,22 +34,22 @@
     <!--Buttons section. -->
     <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
-    <Buttons>
-      <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
+	  <Buttons>
+		  <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
           The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
           the CommandFlag node.
           You can add more than one CommandFlag node e.g.:
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidmortarPackageCmdSet" id="DocLinkerWindowCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_EXT_CUST"/>
-        <Icon guid="guidImages" id="bmpPic1" />
-        <Strings>
-          <ButtonText>DocLinkerWindow</ButtonText>
-        </Strings>
-      </Button>
-    </Buttons>
+		  <Button guid="guidmortarPackageCmdSet" id="mortarWindowCommandId" priority="0x0100" type="Button">
+			  <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_EXT_CUST"/>
+			  <Icon guid="guidImages" id="bmpPic1" />
+			  <Strings>
+				  <ButtonText>mortar: View Links</ButtonText>
+			  </Strings>
+		  </Button>
+	  </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
     <Bitmaps>
@@ -58,7 +58,7 @@
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-      <Bitmap guid="guidImages" href="Resources\DocLinkerWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
+      <Bitmap guid="guidImages" href="Resources\mortarWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
     </Bitmaps>
   </Commands>
 
@@ -68,7 +68,7 @@
 
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidmortarPackageCmdSet" value="{891290a1-2f53-495b-8e2e-e6344618be2c}">
-      <IDSymbol name="DocLinkerWindowCommandId" value="0x0100" />
+      <IDSymbol name="mortarWindowCommandId" value="0x0100" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{1396bad5-9d56-47d1-8105-7010c7db8cb2}" >

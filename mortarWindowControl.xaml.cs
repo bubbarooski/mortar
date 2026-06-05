@@ -5,14 +5,14 @@ using System.Windows.Controls;
 namespace mortar
 {
     /// <summary>
-    /// Interaction logic for DocLinkerWindowControl.
+    /// Interaction logic for mortarWindowControl.
     /// </summary>
-    public partial class DocLinkerWindowControl : UserControl
+    public partial class mortarWindowControl : UserControl
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocLinkerWindowControl"/> class.
+        /// Initializes a new instance of the <see cref="mortarWindowControl"/> class.
         /// </summary>
-        public DocLinkerWindowControl()
+        public mortarWindowControl()
         {
             this.InitializeComponent();
         }
@@ -28,7 +28,7 @@ namespace mortar
         {
             MessageBox.Show(
                 string.Format(System.Globalization.CultureInfo.CurrentUICulture, "Invoked '{0}'", this.ToString()),
-                "DocLinkerWindow");
+                "mortarWindow");
         }
     }
 }

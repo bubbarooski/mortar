@@ -10,7 +10,7 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="DocLinkerWindowControl.xaml" />
+    <None Remove="mortarWindowControl.xaml" />
     <None Remove="mortarPackage.vsct" />
   </ItemGroup>
   <ItemGroup>
