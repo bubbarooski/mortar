@@ -12,16 +12,17 @@ namespace mortarCli.commands
         public static void execute(string[] args)
         {
             string sourceFile = args.Length > 1 ? args[1] : null;
-            string documentPath = args.Length > 2 ? args[2] : null;
+            string documentPath = args.Length > 2 && !args[2].StartsWith("--") ? args[2] : null;
             string url = null;
             string nickname = null;
             string docType = null;
             string notes = null;
             bool isPrimary = false;
             bool outOfDateDetection = true;
+            int flagStart = documentPath != null ? 3 : 2;
 
             // Parse flags from args
-            for (int i = 2; i < args.Length; i++)
+            for (int i = flagStart; i < args.Length; i++)
             {
                 switch (args[i].ToLower())
                 {
