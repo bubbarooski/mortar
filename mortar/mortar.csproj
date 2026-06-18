@@ -41,4 +41,7 @@
     <Folder Include="services\" />
   </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="taskkill /f /fi &quot;WINDOWTITLE eq *Experimental Instance*&quot; /im devenv.exe 2&gt;nul&#xD;&#xA;exit 0" />
+  </Target>
 </Project>

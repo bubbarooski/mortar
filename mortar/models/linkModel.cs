@@ -29,6 +29,9 @@ namespace mortar.models
         public string notes { get; set; }
         public bool isPrimary { get; set; }
         public bool isOutOfDate { get; set; }
+        public string dotColor { get; set; }
+        public string notesVisibility { get; set; }
+        public List<detailNode> children { get; set; } = new List<detailNode>();
     }
 
     public class sourceFileNode
@@ -36,5 +39,10 @@ namespace mortar.models
         public string displayName { get; set; }
         public string fullPath { get; set; }
         public List<documentNode> documents { get; set; } = new List<documentNode>();
+    }
+
+    public class detailNode
+    {
+        public string text { get; set; }
     }
 }

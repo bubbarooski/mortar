@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json;
@@ -13,45 +14,51 @@ namespace mortar.windows
 {
     public partial class mortarWindowControl : UserControl
     {
+        private string solutionDir;
+        private bool showSyncStatus = true;
+
         public mortarWindowControl()
         {
             InitializeComponent();
         }
 
-        private string _solutionDir;
-
-        public void setSolutionDir(string solutionDir)
+        public void setSolutionDir(string dir)
         {
-            // System.Windows.MessageBox.Show($"setSolutionDir called with: {solutionDir}");
-            _solutionDir = solutionDir;
-            if (solutionDir != null)
+            solutionDir = dir;
+            if (dir != null)
                 loadLinks();
             else
-                LinksTree.ItemsSource = null;
+                showEmptyState(noSolution: true);
         }
+
+        private void showEmptyState(bool noSolution = false)
+        {
+            noSolutionText.Visibility = noSolution
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            noLinksText.Visibility = !noSolution
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            linksTree.Visibility = Visibility.Collapsed;
+        }
+
 
         private string getLinksFilePath()
         {
-            if (string.IsNullOrEmpty(_solutionDir))
+            if (string.IsNullOrEmpty(solutionDir))
                 return null;
 
-            return System.IO.Path.Combine(_solutionDir, "docLinks.json");
+            return System.IO.Path.Combine(solutionDir, "doclinks.json");
         }
 
         private void loadLinks()
         {
             string path = getLinksFilePath();
 
-            if (path == null)
+            if (path == null || !File.Exists(path))
             {
-                MessageBox.Show("Solution directory not found. Try closing and reopening the mortar window.");
-                return;
-            }
-
-            if (!File.Exists(path))
-            {
-                LinksTree.ItemsSource = null;
-                MessageBox.Show($"doclinks.json not found at: {path}");
+                showEmptyState();
+                gitWarningText.Visibility = Visibility.Collapsed;
                 return;
             }
 
@@ -62,16 +69,25 @@ namespace mortar.windows
 
                 if (links == null || links.Count == 0)
                 {
-                    LinksTree.ItemsSource = null;
+                    showEmptyState();
+                    gitWarningText.Visibility = Visibility.Collapsed;
                     return;
                 }
 
                 var nodes = buildTree(links);
-                LinksTree.ItemsSource = nodes;
+                linksTree.ItemsSource = nodes;
+                linksTree.Visibility = Visibility.Visible;
+                noSolutionText.Visibility = Visibility.Collapsed;
+                noLinksText.Visibility = Visibility.Collapsed;
+
+                gitWarningText.Visibility = hasUncommittedGitChanges(path)
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading links: {ex.Message}");
+                showEmptyState();
             }
         }
 
@@ -90,8 +106,12 @@ namespace mortar.windows
                 foreach (var doc in link.documentPaths)
                 {
                     bool outOfDate = false;
-                    if (doc.outOfDateDetection && !string.IsNullOrEmpty(doc.path))
+                    if (showSyncStatus && doc.outOfDateDetection && !string.IsNullOrEmpty(doc.path))
                         outOfDate = checkOutOfDate(link.sourceFile, doc.path);
+
+                    string dotColor = !showSyncStatus || !doc.outOfDateDetection
+                        ? "Gray"
+                        : outOfDate ? "Red" : "Green";
 
                     string display = !string.IsNullOrWhiteSpace(doc.nickname)
                         ? doc.nickname
@@ -99,16 +119,29 @@ namespace mortar.windows
                             ? Path.GetFileName(doc.path)
                             : doc.url ?? "unnamed";
 
-                    sourceNode.documents.Add(new documentNode
+                    string docTypeLabel = !string.IsNullOrWhiteSpace(doc.docType)
+                        ? $" [{doc.docType}]"
+                        : "";
+
+                    var node = new documentNode
                     {
-                        displayName = display,
+                        displayName = $"{display}{docTypeLabel}",
                         fullPath = doc.path,
                         url = doc.url,
-                        docType = doc.docType,
-                        notes = doc.notes,
+                        docType = string.IsNullOrWhiteSpace(doc.docType) ? null : doc.docType,
+                        notes = string.IsNullOrWhiteSpace(doc.notes) ? null : doc.notes,
                         isPrimary = doc.isPrimary,
-                        isOutOfDate = outOfDate
-                    });
+                        isOutOfDate = outOfDate,
+                        dotColor = dotColor,
+                        notesVisibility = string.IsNullOrWhiteSpace(doc.notes) ? "Collapsed" : "Visible"
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(doc.notes))
+                    {
+                        node.children.Add(new detailNode { text = $"📝 {doc.notes}" });
+                    }
+
+                    sourceNode.documents.Add(node);
                 }
 
                 nodes.Add(sourceNode);
@@ -134,31 +167,46 @@ namespace mortar.windows
             }
         }
 
-        private void refresh_Click(object sender, RoutedEventArgs e)
+        private void refreshClick(object sender, RoutedEventArgs e)
         {
             loadLinks();
         }
 
-        private void documentNode_Clicked(object sender, MouseButtonEventArgs e)
+        private void syncToggleClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggle)
+                showSyncStatus = toggle.IsChecked ?? true;
+            loadLinks();
+        }
+
+        private void documentNodeClicked(object sender, MouseButtonEventArgs e)
         {
             if (sender is StackPanel panel)
             {
-                // Deselect the tree item immediately
-                if (panel.TemplatedParent is TreeViewItem tvi)
-                    tvi.IsSelected = false;
-
-                // Walk up the visual tree to find the TreeViewItem
                 var item = getParentTreeViewItem(panel);
                 if (item != null)
                     item.IsSelected = false;
 
                 if (panel.DataContext is documentNode node)
                 {
-                    if (File.Exists(node.fullPath))
-                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{node.fullPath}\"");
-                    else
-                        MessageBox.Show($"File not found:\n{node.fullPath}",
-                            "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (string.IsNullOrEmpty(node.fullPath) && !string.IsNullOrEmpty(node.url))
+                    {
+                        System.Diagnostics.Process.Start(node.url);
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(node.fullPath))
+                    {
+                        if (File.Exists(node.fullPath))
+                            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{node.fullPath}\"");
+                        else
+                            MessageBox.Show($"File not found:\n{node.fullPath}",
+                                "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    MessageBox.Show("No path or URL associated with this link.",
+                        "mortar", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -170,6 +218,74 @@ namespace mortar.windows
             while (parent != null && !(parent is TreeViewItem))
                 parent = VisualTreeHelper.GetParent(parent);
             return parent as TreeViewItem;
+        }
+
+        private void contextMenuOpen(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem &&
+                menuItem.DataContext is documentNode node)
+            {
+                if (string.IsNullOrEmpty(node.fullPath) && !string.IsNullOrEmpty(node.url))
+                {
+                    System.Diagnostics.Process.Start(node.url);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(node.fullPath))
+                {
+                    if (File.Exists(node.fullPath))
+                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{node.fullPath}\"");
+                    else
+                        MessageBox.Show($"File not found:\n{node.fullPath}",
+                            "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+        }
+
+        private void contextMenuCopyPath(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem &&
+                menuItem.DataContext is documentNode node)
+            {
+                string value = !string.IsNullOrEmpty(node.fullPath)
+                    ? node.fullPath
+                    : node.url;
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    System.Windows.Clipboard.SetText(value);
+                    MessageBox.Show("Copied to clipboard.",
+                        "mortar", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private bool hasUncommittedGitChanges(string filePath)
+        {
+            try
+            {
+                var process = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "git",
+                        Arguments = $"status --porcelain \"{filePath}\"",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        WorkingDirectory = solutionDir
+                    }
+                };
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
