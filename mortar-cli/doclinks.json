@@ -15,8 +15,17 @@
         "path": "C:\\Users\\shane\\Desktop\\testInfo.txt",
         "url": null,
         "nickname": "Test",
-        "docType": null,
+        "docType": "datasheet",
         "notes": null,
+        "isPrimary": true,
+        "outOfDateDetection": false
+      },
+      {
+        "path": null,
+        "url": "https://google.com",
+        "nickname": "Test URL",
+        "docType": null,
+        "notes": "test test test",
         "isPrimary": false,
         "outOfDateDetection": true
       }
