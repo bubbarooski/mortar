@@ -20,6 +20,11 @@ namespace mortar.models
         public string linkedAt { get; set; }
     }
 
+    public class detailNode
+    {
+        public string text { get; set; }
+    }
+
     public class documentNode
     {
         public string displayName { get; set; }
@@ -31,7 +36,14 @@ namespace mortar.models
         public bool isOutOfDate { get; set; }
         public string dotColor { get; set; }
         public string notesVisibility { get; set; }
+        public string childrenVisibility { get; set; }
         public List<detailNode> children { get; set; } = new List<detailNode>();
+        public bool isEditing { get; set; } = false;
+        public string editNickname { get; set; }
+        public string editPath { get; set; }
+        public string editUrl { get; set; }
+        public string editDocType { get; set; }
+        public string editNotes { get; set; }
     }
 
     public class sourceFileNode
@@ -39,10 +51,6 @@ namespace mortar.models
         public string displayName { get; set; }
         public string fullPath { get; set; }
         public List<documentNode> documents { get; set; } = new List<documentNode>();
-    }
-
-    public class detailNode
-    {
-        public string text { get; set; }
+        public bool isAddingLink { get; set; } = false;
     }
 }
