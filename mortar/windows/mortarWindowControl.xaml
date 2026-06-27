@@ -9,10 +9,12 @@
 
     <UserControl.Resources>
         <local:docTypeDisplayConverter x:Key="docTypeConverter"/>
+        <BooleanToVisibilityConverter x:Key="boolToVis"/>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,14 +28,14 @@
                        VerticalAlignment="Center"
                        Margin="0,0,10,0"
                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-            <Button Content="Add Link"
+            <Button Content="+ New File"
                     Click="headerAddLink"
                     Padding="8,2"
                     VerticalAlignment="Center"
                     Margin="0,0,6,0"
                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
-        BorderBrush="Transparent"/>
+                    BorderBrush="Transparent"/>
             <Button Content="Refresh"
                     Click="refreshClick"
                     Padding="8,2"
@@ -85,12 +87,11 @@
         </StackPanel>
 
         <!-- Git warning banner -->
-        <!-- Git warning banner -->
         <Border Grid.Row="1"
-        Name="gitWarningBanner"
-        Background="#3D2E00"
-        Padding="8,4"
-        Visibility="Collapsed">
+                Name="gitWarningBanner"
+                Background="#3D2E00"
+                Padding="8,4"
+                Visibility="Collapsed">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -98,28 +99,217 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <TextBlock Text="⚠ "
-                       Foreground="Orange"
-                       VerticalAlignment="Center"/>
+                               Foreground="Orange"
+                               VerticalAlignment="Center"/>
                     <TextBlock Text="doclinks.json has uncommitted changes."
-                       Foreground="Orange"
-                       FontSize="11"
-                       TextWrapping="Wrap"
-                       VerticalAlignment="Center"/>
+                               Foreground="Orange"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"/>
                 </StackPanel>
                 <Button Grid.Column="1"
-                Content="✕"
-                Click="dismissGitWarning"
-                Foreground="Orange"
-                Background="Transparent"
-                BorderBrush="Transparent"
-                Padding="4,0"
-                VerticalAlignment="Center"
-                Cursor="Hand"/>
+                        Content="✕"
+                        Click="dismissGitWarning"
+                        Foreground="Orange"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        Padding="4,0"
+                        VerticalAlignment="Center"
+                        Cursor="Hand"/>
             </Grid>
         </Border>
 
+        <!-- Header add link panel -->
+        <Border Grid.Row="2"
+                Name="headerAddPanel"
+                Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                BorderThickness="0,1,0,1"
+                Padding="8,8,8,8"
+                Visibility="Collapsed">
+            <StackPanel Focusable="False">
+
+                <TextBlock Text="Track New File"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,8"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Source File -->
+                <TextBlock Text="Source File to Track"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <TextBox Text="{Binding sourceFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,2,0,6"
+                         Padding="4,2"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                         BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Path -->
+                <TextBlock Text="Path"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <TextBox Text="{Binding path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding pathEnabled}"
+                         Margin="0,2,0,6"
+                         Padding="4,2"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                         BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- URL -->
+                <TextBlock Text="URL"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <TextBox Text="{Binding url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding urlEnabled}"
+                         Margin="0,2,0,6"
+                         Padding="4,2"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                         BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Nickname -->
+                <TextBlock Text="Nickname"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <TextBox Text="{Binding nickname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,2,0,6"
+                         Padding="4,2"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                         BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Type -->
+                <TextBlock Text="Type"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <ComboBox SelectedValue="{Binding docType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=docTypeOptions}"
+                          Margin="0,2,0,6"
+                          Padding="4,2">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource docTypeConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    <ComboBox.Style>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <Setter Property="BorderBrush"
+                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ComboBox">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="20"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.ColumnSpan="2"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"/>
+                                            <ContentPresenter Grid.Column="0"
+                                                              Margin="4,2,0,2"
+                                                              VerticalAlignment="Center"
+                                                              Content="{TemplateBinding SelectionBoxItem}"
+                                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+                                            <Path Grid.Column="1"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z"
+                                                  Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                            <ToggleButton Grid.ColumnSpan="2"
+                                                          Opacity="0"
+                                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                                            <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                   Placement="Bottom"
+                                                   AllowsTransparency="True">
+                                                <Border Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                                                        BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                                        BorderThickness="1"
+                                                        MinWidth="{TemplateBinding ActualWidth}">
+                                                    <ScrollViewer>
+                                                        <ItemsPresenter/>
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Popup>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ComboBox.Style>
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <Setter Property="Padding" Value="4,2"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightKey}}"/>
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightTextKey}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <!-- Notes -->
+                <TextBlock Text="Notes"
+                           FontSize="10"
+                           Opacity="0.6"
+                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                <TextBox Text="{Binding notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,2,0,6"
+                         Padding="4,2"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                         BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Primary -->
+                <CheckBox Content="Primary reference"
+                          IsChecked="{Binding isPrimary, Mode=TwoWay}"
+                          Margin="0,0,0,6"
+                          Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+
+                <!-- Save and Cancel -->
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <Button Content="Add"
+                            Click="saveHeaderLink"
+                            Padding="8,2"
+                            Margin="0,0,6,0"
+                            Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
+                            Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
+                            BorderBrush="Transparent"/>
+                    <Button Content="Cancel"
+                            Click="cancelHeaderLink"
+                            Padding="8,2"
+                            Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
+                            Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
+                            BorderBrush="Transparent"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+
         <!-- No solution open message -->
-        <TextBlock Grid.Row="2"
+        <TextBlock Grid.Row="3"
                    Name="noSolutionText"
                    Text="Open a solution to get started."
                    Foreground="{DynamicResource {x:Static vsshell:VsBrushes.GrayTextKey}}"
@@ -128,7 +318,7 @@
                    Visibility="Collapsed"/>
 
         <!-- No links message -->
-        <TextBlock Grid.Row="2"
+        <TextBlock Grid.Row="3"
                    Name="noLinksText"
                    Text="No links found. Use mortar-cli to add links."
                    Foreground="{DynamicResource {x:Static vsshell:VsBrushes.GrayTextKey}}"
@@ -137,7 +327,7 @@
                    Visibility="Collapsed"/>
 
         <!-- Tree view -->
-        <TreeView Grid.Row="2"
+        <TreeView Grid.Row="3"
                   Name="linksTree"
                   Margin="4"
                   Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
@@ -148,17 +338,57 @@
 
                 <Style TargetType="TreeViewItem">
                     <Setter Property="Background"
-                            Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
+            Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
                     <Setter Property="Foreground"
-                            Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                        </Trigger>
-                    </Style.Triggers>
+            Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                    <Setter Property="IsTabStop" Value="False"/>
+                    <Setter Property="Focusable" Value="False"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <EventSetter Event="Selected" Handler="treeViewItemSelected"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TreeViewItem">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <ToggleButton Grid.Column="0"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                      Visibility="{Binding HasItems, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource boolToVis}}">
+                                            <ToggleButton.Template>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border Width="16" Height="16" Background="Transparent">
+                                                        <Path x:Name="arrow"
+                                              Data="M 4 2 L 12 8 L 4 14 Z"
+                                              Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter TargetName="arrow" Property="Data" Value="M 2 4 L 14 4 L 8 12 Z"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </ToggleButton.Template>
+                                        </ToggleButton>
+                                        <ContentPresenter Grid.Column="1"
+                                          ContentSource="Header"
+                                          VerticalAlignment="Center"/>
+                                    </Grid>
+                                    <ItemsPresenter Grid.Row="1"
+                                    Margin="16,0,0,0"
+                                    Visibility="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource boolToVis}}"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
 
                 <!-- Notes child row template -->
@@ -174,19 +404,14 @@
 
                 <!-- Document row template -->
                 <HierarchicalDataTemplate DataType="{x:Type local:documentNode}"
-                                          ItemsSource="{Binding children}">
-                    <HierarchicalDataTemplate.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem">
-                            <Setter Property="Visibility"
-                                    Value="{Binding childrenVisibility}"/>
-                        </Style>
-                    </HierarchicalDataTemplate.ItemContainerStyle>
-                    <StackPanel>
+                          ItemsSource="{Binding children}">
+                    <StackPanel Focusable="False">
 
                         <!-- Normal row -->
                         <StackPanel Orientation="Horizontal"
                                     Margin="2"
                                     Cursor="Hand"
+                                    Focusable="False"
                                     MouseLeftButtonUp="documentNodeClicked">
                             <StackPanel.ContextMenu>
                                 <ContextMenu>
@@ -248,7 +473,8 @@
                         </StackPanel>
 
                         <!-- Edit panel -->
-                        <StackPanel Margin="16,4,4,8">
+                        <StackPanel Margin="16,4,4,8"
+                                    Focusable="False">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -278,6 +504,7 @@
                                        Opacity="0.6"
                                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                             <TextBox Text="{Binding editPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding editPathEnabled}"
                                      Margin="0,2,0,6"
                                      Padding="4,2"
                                      Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
@@ -290,6 +517,7 @@
                                        Opacity="0.6"
                                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                             <TextBox Text="{Binding editUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding editUrlEnabled}"
                                      Margin="0,2,0,6"
                                      Padding="4,2"
                                      Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
@@ -418,11 +646,10 @@
                 <!-- Source file row template -->
                 <HierarchicalDataTemplate DataType="{x:Type local:sourceFileNode}"
                           ItemsSource="{Binding documents}">
-                    <StackPanel>
+                    <StackPanel Focusable="False">
 
                         <!-- Source file row -->
-                        <StackPanel Orientation="Horizontal"
-                    Margin="2">
+                        <StackPanel Orientation="Horizontal" Margin="2" Focusable="False">
                             <StackPanel.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add Link" Click="contextMenuAddLink"/>
@@ -430,13 +657,14 @@
                             </StackPanel.ContextMenu>
                             <TextBlock Text="📄 " VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding displayName}"
-                       FontWeight="SemiBold"
-                       VerticalAlignment="Center"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                         </StackPanel>
 
                         <!-- Add link panel -->
-                        <StackPanel Margin="16,4,4,8">
+                        <StackPanel Margin="16,4,4,8"
+                                    Focusable="False">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -450,49 +678,51 @@
 
                             <!-- Path -->
                             <TextBlock Text="Path"
-                       FontSize="10"
-                       Opacity="0.6"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                            <TextBox Name="newLinkPath"
-                     Margin="0,2,0,6"
-                     Padding="4,2"
-                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
-                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                       FontSize="10"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <TextBox Text="{Binding newLink.path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding newLink.pathEnabled}"
+                                     Margin="0,2,0,6"
+                                     Padding="4,2"
+                                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
 
                             <!-- URL -->
                             <TextBlock Text="URL"
-                       FontSize="10"
-                       Opacity="0.6"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                            <TextBox Name="newLinkUrl"
-                     Margin="0,2,0,6"
-                     Padding="4,2"
-                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
-                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                       FontSize="10"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <TextBox Text="{Binding newLink.url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding newLink.urlEnabled}"
+                                     Margin="0,2,0,6"
+                                     Padding="4,2"
+                                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
 
                             <!-- Nickname -->
                             <TextBlock Text="Nickname"
-                       FontSize="10"
-                       Opacity="0.6"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                            <TextBox Name="newLinkNickname"
-                     Margin="0,2,0,6"
-                     Padding="4,2"
-                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
-                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                       FontSize="10"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <TextBox Text="{Binding newLink.nickname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,2,0,6"
+                                     Padding="4,2"
+                                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
 
                             <!-- Type -->
                             <TextBlock Text="Type"
-                       FontSize="10"
-                       Opacity="0.6"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                            <ComboBox Name="newLinkDocType"
-                      ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=docTypeOptions}"
-                      Margin="0,2,0,6"
-                      Padding="4,2">
+                                       FontSize="10"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <ComboBox SelectedValue="{Binding newLink.docType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=docTypeOptions}"
+                                      Margin="0,2,0,6"
+                                      Padding="4,2">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource docTypeConverter}}"/>
@@ -501,11 +731,11 @@
                                 <ComboBox.Style>
                                     <Style TargetType="ComboBox">
                                         <Setter Property="Background"
-                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
+                                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
                                         <Setter Property="Foreground"
-                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                                         <Setter Property="BorderBrush"
-                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                                         <Setter Property="BorderThickness" Value="1"/>
                                         <Setter Property="Template">
                                             <Setter.Value>
@@ -516,29 +746,29 @@
                                                             <ColumnDefinition Width="20"/>
                                                         </Grid.ColumnDefinitions>
                                                         <Border Grid.ColumnSpan="2"
-                                                Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"/>
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}"/>
                                                         <ContentPresenter Grid.Column="0"
-                                                          Margin="4,2,0,2"
-                                                          VerticalAlignment="Center"
-                                                          Content="{TemplateBinding SelectionBoxItem}"
-                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+                                                                          Margin="4,2,0,2"
+                                                                          VerticalAlignment="Center"
+                                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
                                                         <Path Grid.Column="1"
-                                              Data="M 0 0 L 4 4 L 8 0 Z"
-                                              Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
+                                                              Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
                                                         <ToggleButton Grid.ColumnSpan="2"
-                                                      Opacity="0"
-                                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                                                                      Opacity="0"
+                                                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
                                                         <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
-                                               Placement="Bottom"
-                                               AllowsTransparency="True">
+                                                               Placement="Bottom"
+                                                               AllowsTransparency="True">
                                                             <Border Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
-                                                    BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                                                    BorderThickness="1"
-                                                    MinWidth="{TemplateBinding ActualWidth}">
+                                                                    BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                                                    BorderThickness="1"
+                                                                    MinWidth="{TemplateBinding ActualWidth}">
                                                                 <ScrollViewer>
                                                                     <ItemsPresenter/>
                                                                 </ScrollViewer>
@@ -553,16 +783,16 @@
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
                                         <Setter Property="Background"
-                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
+                                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"/>
                                         <Setter Property="Foreground"
-                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                                Value="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
                                         <Setter Property="Padding" Value="4,2"/>
                                         <Style.Triggers>
                                             <Trigger Property="IsHighlighted" Value="True">
                                                 <Setter Property="Background"
-                                        Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightKey}}"/>
+                                                        Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightKey}}"/>
                                                 <Setter Property="Foreground"
-                                        Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightTextKey}}"/>
+                                                        Value="{DynamicResource {x:Static vsshell:VsBrushes.HighlightTextKey}}"/>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
@@ -571,37 +801,37 @@
 
                             <!-- Notes -->
                             <TextBlock Text="Notes"
-                       FontSize="10"
-                       Opacity="0.6"
-                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
-                            <TextBox Name="newLinkNotes"
-                     Margin="0,2,0,6"
-                     Padding="4,2"
-                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
-                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
-                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                       FontSize="10"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                            <TextBox Text="{Binding newLink.notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,2,0,6"
+                                     Padding="4,2"
+                                     Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                                     Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                     BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
 
                             <!-- Primary -->
                             <CheckBox Content="Primary reference"
-                      Name="newLinkPrimary"
-                      Margin="0,0,0,6"
-                      Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
+                                      IsChecked="{Binding newLink.isPrimary, Mode=TwoWay}"
+                                      Margin="0,0,0,6"
+                                      Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"/>
 
                             <!-- Save and Cancel -->
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                 <Button Content="Add"
-                        Click="saveNewLink"
-                        Padding="8,2"
-                        Margin="0,0,6,0"
-                        Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
-                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
-                        BorderBrush="Transparent"/>
+                                        Click="saveNewLink"
+                                        Padding="8,2"
+                                        Margin="0,0,6,0"
+                                        Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
+                                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
+                                        BorderBrush="Transparent"/>
                                 <Button Content="Cancel"
-                        Click="cancelNewLink"
-                        Padding="8,2"
-                        Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
-                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
-                        BorderBrush="Transparent"/>
+                                        Click="cancelNewLink"
+                                        Padding="8,2"
+                                        Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
+                                        Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}"
+                                        BorderBrush="Transparent"/>
                             </StackPanel>
 
                         </StackPanel>

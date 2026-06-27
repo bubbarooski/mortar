@@ -21,6 +21,8 @@ namespace mortar.windows
         private string editingUrl = null;
         private HashSet<string> expandedNodes = new HashSet<string>();
         private string addingLinkToSource = null;
+        private bool showingHeaderAddForm = false;
+        public newSourceLinkForm headerLinkForm { get; set; } = new newSourceLinkForm();
 
         public static readonly Dictionary<string, string> docTypeDisplayNames = new Dictionary<string, string>
         {
@@ -140,60 +142,66 @@ namespace mortar.windows
 
             foreach (var link in links)
             {
+                bool isAddingToThisFile = addingLinkToSource != null &&
+                    pathHelper.pathsEqual(addingLinkToSource, link.sourceFile);
+
                 var sourceNode = new sourceFileNode
                 {
                     displayName = Path.GetFileName(link.sourceFile),
                     fullPath = link.sourceFile,
-                    isAddingLink = addingLinkToSource != null &&
-                        pathHelper.pathsEqual(addingLinkToSource, link.sourceFile)
+                    isAddingLink = isAddingToThisFile,
+                    newLink = new newLinkForm()
                 };
 
-                foreach (var doc in link.documentPaths)
+                if (!isAddingToThisFile)
                 {
-                    bool outOfDate = false;
-                    if (showSyncStatus && doc.outOfDateDetection && !string.IsNullOrEmpty(doc.path))
-                        outOfDate = checkOutOfDate(link.sourceFile, doc.path);
-
-                    string dotColor = !showSyncStatus || !doc.outOfDateDetection
-                        ? "Gray"
-                        : outOfDate ? "Red" : "Green";
-
-                    string display = !string.IsNullOrWhiteSpace(doc.nickname)
-                        ? doc.nickname
-                        : !string.IsNullOrEmpty(doc.path)
-                            ? Path.GetFileName(doc.path)
-                            : doc.url ?? "unnamed";
-
-                    string docTypeLabel = !string.IsNullOrWhiteSpace(doc.docType)
-                        ? $" [{(docTypeDisplayNames.TryGetValue(doc.docType, out string displayName) ? displayName : doc.docType)}]"
-                        : "";
-
-                    var node = new documentNode
+                    foreach (var doc in link.documentPaths)
                     {
-                        displayName = $"{display}{docTypeLabel}",
-                        fullPath = doc.path,
-                        url = doc.url,
-                        docType = string.IsNullOrWhiteSpace(doc.docType) ? null : doc.docType,
-                        notes = string.IsNullOrWhiteSpace(doc.notes) ? null : doc.notes,
-                        isPrimary = doc.isPrimary,
-                        isOutOfDate = outOfDate,
-                        dotColor = dotColor,
-                        notesVisibility = string.IsNullOrWhiteSpace(doc.notes) ? "Collapsed" : "Visible",
-                        editNickname = doc.nickname,
-                        editPath = doc.path,
-                        editUrl = doc.url,
-                        editDocType = doc.docType,
-                        editNotes = doc.notes,
-                        isEditing = isMatchingEditNode(doc.path, doc.url),
-                        childrenVisibility = isMatchingEditNode(doc.path, doc.url) ? "Collapsed" : "Visible"
-                    };
+                        bool outOfDate = false;
+                        if (showSyncStatus && doc.outOfDateDetection && !string.IsNullOrEmpty(doc.path))
+                            outOfDate = checkOutOfDate(link.sourceFile, doc.path);
 
-                    if (!string.IsNullOrWhiteSpace(doc.notes) && !node.isEditing)
-                    {
-                        node.children.Add(new detailNode { text = $"📝 {doc.notes}" });
+                        string dotColor = !showSyncStatus || !doc.outOfDateDetection
+                            ? "Gray"
+                            : outOfDate ? "Red" : "Green";
+
+                        string display = !string.IsNullOrWhiteSpace(doc.nickname)
+                            ? doc.nickname
+                            : !string.IsNullOrEmpty(doc.path)
+                                ? Path.GetFileName(doc.path)
+                                : doc.url ?? "unnamed";
+
+                        string docTypeLabel = !string.IsNullOrWhiteSpace(doc.docType)
+                            ? $" [{(docTypeDisplayNames.TryGetValue(doc.docType, out string displayName) ? displayName : doc.docType)}]"
+                            : "";
+
+                        var node = new documentNode
+                        {
+                            displayName = $"{display}{docTypeLabel}",
+                            fullPath = doc.path,
+                            url = doc.url,
+                            docType = string.IsNullOrWhiteSpace(doc.docType) ? null : doc.docType,
+                            notes = string.IsNullOrWhiteSpace(doc.notes) ? null : doc.notes,
+                            isPrimary = doc.isPrimary,
+                            isOutOfDate = outOfDate,
+                            dotColor = dotColor,
+                            notesVisibility = string.IsNullOrWhiteSpace(doc.notes) ? "Collapsed" : "Visible",
+                            editNickname = doc.nickname,
+                            editPath = doc.path,
+                            editUrl = doc.url,
+                            editDocType = doc.docType,
+                            editNotes = doc.notes,
+                            isEditing = isMatchingEditNode(doc.path, doc.url),
+                            childrenVisibility = isMatchingEditNode(doc.path, doc.url) ? "Collapsed" : "Visible"
+                        };
+
+                        if (!string.IsNullOrWhiteSpace(doc.notes) && !node.isEditing)
+                        {
+                            node.children.Add(new detailNode { text = $"📝 {doc.notes}" });
+                        }
+
+                        sourceNode.documents.Add(node);
                     }
-
-                    sourceNode.documents.Add(node);
                 }
 
                 nodes.Add(sourceNode);
@@ -482,19 +490,24 @@ namespace mortar.windows
                 var links = storageService.loadLinks(path);
                 if (links == null) return;
 
-                var panel = button.Parent as StackPanel;
-                var outerPanel = panel?.Parent as StackPanel;
-
-                string newPathValue = (outerPanel?.FindName("newLinkPath") as TextBox)?.Text?.Trim();
-                string newUrlValue = (outerPanel?.FindName("newLinkUrl") as TextBox)?.Text?.Trim();
-                string newNickname = (outerPanel?.FindName("newLinkNickname") as TextBox)?.Text?.Trim();
-                string newDocType = (outerPanel?.FindName("newLinkDocType") as ComboBox)?.SelectedValue as string;
-                string newNotes = (outerPanel?.FindName("newLinkNotes") as TextBox)?.Text?.Trim();
-                bool newPrimary = (outerPanel?.FindName("newLinkPrimary") as CheckBox)?.IsChecked ?? false;
+                string newPathValue = node.newLink.path?.Trim();
+                string newUrlValue = node.newLink.url?.Trim();
+                string newNickname = node.newLink.nickname?.Trim();
+                string newDocType = node.newLink.docType?.Trim();
+                string newNotes = node.newLink.notes?.Trim();
+                bool newPrimary = node.newLink.isPrimary;
 
                 if (string.IsNullOrEmpty(newPathValue) && string.IsNullOrEmpty(newUrlValue))
                 {
                     MessageBox.Show("Please provide a path or URL.",
+                        "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validate path exists if provided
+                if (!string.IsNullOrEmpty(newPathValue) && !File.Exists(newPathValue))
+                {
+                    MessageBox.Show($"File not found:\n{newPathValue}\n\nPlease provide a valid path.",
                         "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -517,18 +530,14 @@ namespace mortar.windows
                 };
 
                 if (existing != null)
-                {
                     existing.documentPaths.Add(entry);
-                }
                 else
-                {
                     links.Add(new docLink
                     {
                         sourceFile = node.fullPath,
                         documentPaths = new List<documentEntry> { entry },
                         linkedAt = DateTime.UtcNow.ToString("o")
                     });
-                }
 
                 storageService.saveLinks(path, links);
                 addingLinkToSource = null;
@@ -544,8 +553,112 @@ namespace mortar.windows
 
         private void headerAddLink(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Add Link from header coming soon.",
-                "mortar", MessageBoxButton.OK, MessageBoxImage.Information);
+            showingHeaderAddForm = !showingHeaderAddForm;
+            headerAddPanel.Visibility = showingHeaderAddForm
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            headerLinkForm = new newSourceLinkForm();
+            headerAddPanel.DataContext = headerLinkForm;
+        }
+
+        private void saveHeaderLink(object sender, RoutedEventArgs e)
+        {
+            string sourceFileValue = headerLinkForm.sourceFile?.Trim();
+            string newPathValue = headerLinkForm.path?.Trim();
+            string newUrlValue = headerLinkForm.url?.Trim();
+            string newNickname = headerLinkForm.nickname?.Trim();
+            string newDocType = headerLinkForm.docType?.Trim();
+            string newNotes = headerLinkForm.notes?.Trim();
+            bool newPrimary = headerLinkForm.isPrimary;
+
+            if (string.IsNullOrEmpty(sourceFileValue))
+            {
+                MessageBox.Show("Please provide a source file path.",
+                    "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(newPathValue) && string.IsNullOrEmpty(newUrlValue))
+            {
+                MessageBox.Show("Please provide a path or URL.",
+                    "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validate path exists if provided
+            if (!string.IsNullOrEmpty(newPathValue) && !File.Exists(newPathValue))
+            {
+                MessageBox.Show($"File not found:\n{newPathValue}\n\nPlease provide a valid path.",
+                    "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string path = getLinksFilePath();
+            if (path == null) return;
+
+            var links = storageService.loadLinks(path);
+            if (links == null) return;
+
+            string normalizedSource = pathHelper.normalizePath(sourceFileValue);
+            string normalizedPath = string.IsNullOrEmpty(newPathValue)
+                ? null
+                : pathHelper.normalizePath(newPathValue);
+
+            if (normalizedSource == null)
+            {
+                MessageBox.Show("Invalid source file path.",
+                    "mortar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var existing = links.Find(l => pathHelper.pathsEqual(l.sourceFile, normalizedSource));
+
+            var entry = new documentEntry
+            {
+                path = normalizedPath,
+                url = string.IsNullOrEmpty(newUrlValue) ? null : newUrlValue,
+                nickname = string.IsNullOrEmpty(newNickname) ? null : newNickname,
+                docType = string.IsNullOrEmpty(newDocType) ? null : newDocType,
+                notes = string.IsNullOrEmpty(newNotes) ? null : newNotes,
+                isPrimary = newPrimary,
+                outOfDateDetection = true
+            };
+
+            if (existing != null)
+            {
+                existing.documentPaths.Add(entry);
+            }
+            else
+            {
+                links.Add(new docLink
+                {
+                    sourceFile = normalizedSource,
+                    documentPaths = new List<documentEntry> { entry },
+                    linkedAt = DateTime.UtcNow.ToString("o")
+                });
+            }
+
+            storageService.saveLinks(path, links);
+            showingHeaderAddForm = false;
+            headerAddPanel.Visibility = Visibility.Collapsed;
+            headerLinkForm = new newSourceLinkForm();
+            loadLinks();
+        }
+
+        private void cancelHeaderLink(object sender, RoutedEventArgs e)
+        {
+            showingHeaderAddForm = false;
+            headerAddPanel.Visibility = Visibility.Collapsed;
+            headerLinkForm = new newSourceLinkForm();
+        }
+
+        private void treeViewItemSelected(object sender, RoutedEventArgs e)
+        {
+            if (sender is TreeViewItem tvi)
+            {
+                tvi.IsSelected = false;
+                e.Handled = true;
+            }
         }
     }
 }
