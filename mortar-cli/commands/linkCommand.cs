@@ -167,8 +167,15 @@ namespace mortarCli.commands
             var links = storageService.loadLinks();
             if (links == null) return;
 
-            var existing = links.Find(l => pathHelper.pathsEqual(l.sourceFile, sourceNormalized));
+            // Convert source to relative path for portability
+            string solutionRoot = Directory.GetCurrentDirectory();
+            string sourceRelative = pathHelper.makeRelativePath(solutionRoot, sourceNormalized);
 
+            var existing = links.Find(l =>
+            {
+                string resolvedExisting = pathHelper.resolveRelativePath(solutionRoot, l.sourceFile);
+                return pathHelper.pathsEqual(resolvedExisting, sourceNormalized);
+            });
             if (existing != null)
             {
                 if (!string.IsNullOrEmpty(docNormalized) &&
@@ -203,7 +210,7 @@ namespace mortarCli.commands
             {
                 links.Add(new docLink
                 {
-                    sourceFile = sourceNormalized,
+                    sourceFile = sourceRelative,
                     documentPaths = new List<documentEntry>
                     {
                         new documentEntry
@@ -225,7 +232,7 @@ namespace mortarCli.commands
 
             string label = !string.IsNullOrEmpty(nickname) ? $" (\"{nickname}\")" : "";
             string target = !string.IsNullOrEmpty(docNormalized) ? docNormalized : url;
-            Console.WriteLine($"Linked {sourceNormalized} -> {target}{label}");
+            Console.WriteLine($"Linked {sourceRelative} -> {target}{label}");
         }
     }
 }

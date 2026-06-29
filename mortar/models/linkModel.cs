@@ -49,6 +49,8 @@ namespace mortar.models
         public string editNotes { get; set; }
         public bool editPathEnabled => string.IsNullOrEmpty(editUrl);
         public bool editUrlEnabled => string.IsNullOrEmpty(editPath);
+        public string nodeId { get; set; }
+        public string tagValue { get; set; }
     }
     public class sourceFileNode
     {
@@ -57,6 +59,8 @@ namespace mortar.models
         public List<documentNode> documents { get; set; } = new List<documentNode>();
         public bool isAddingLink { get; set; } = false;
         public newLinkForm newLink { get; set; } = new newLinkForm();
+        public string nodeId { get; set; }
+        public string tagValue { get; set; }
     }
 
     public class newLinkForm : System.ComponentModel.INotifyPropertyChanged
@@ -164,6 +168,25 @@ namespace mortar.models
                     if (kvp.Value == display) return kvp.Key;
             }
             return value ?? "";
+        }
+    }
+
+    public class folderNode
+    {
+        public string displayName { get; set; }
+        public string fullPath { get; set; }
+        public List<folderNode> subFolders { get; set; } = new List<folderNode>();
+        public List<sourceFileNode> files { get; set; } = new List<sourceFileNode>();
+
+        public List<object> children
+        {
+            get
+            {
+                var result = new List<object>();
+                result.AddRange(subFolders);
+                result.AddRange(files);
+                return result;
+            }
         }
     }
 }

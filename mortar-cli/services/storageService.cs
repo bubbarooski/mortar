@@ -10,7 +10,7 @@ namespace mortarCli.services
     {
         private static string getLinksFilePath()
         {
-            return Path.Combine(Directory.GetCurrentDirectory(), "doclinks.json");
+            return Path.Combine(Directory.GetCurrentDirectory(), "docLinks.mor");
         }
 
         public static List<docLink> loadLinks()
@@ -32,18 +32,18 @@ namespace mortarCli.services
             }
             catch (JsonException)
             {
-                Console.WriteLine("Warning: doclinks.json is corrupted or malformed.");
+                Console.WriteLine("Warning: docLinks.mor is corrupted or malformed.");
                 Console.WriteLine("Rename or delete it to start fresh.");
                 return null;
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine("Error: No permission to read doclinks.json.");
+                Console.WriteLine("Error: No permission to read docLinks.mor.");
                 return null;
             }
             catch (IOException ex)
             {
-                Console.WriteLine($"Error reading doclinks.json: {ex.Message}");
+                Console.WriteLine($"Error reading docLinks.mor: {ex.Message}");
                 return null;
             }
         }
@@ -58,12 +58,12 @@ namespace mortarCli.services
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine("Error: No permission to write doclinks.json.");
+                Console.WriteLine("Error: No permission to write docLinks.mor.");
                 return false;
             }
             catch (IOException ex)
             {
-                Console.WriteLine($"Error writing doclinks.json: {ex.Message}");
+                Console.WriteLine($"Error writing docLinks.mor: {ex.Message}");
                 return false;
             }
         }

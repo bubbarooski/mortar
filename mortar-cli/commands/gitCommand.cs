@@ -40,31 +40,31 @@ namespace mortarCli.commands
                 return;
             }
 
-            string linksFile = Path.Combine(Directory.GetCurrentDirectory(), "doclinks.json");
+            string linksFile = Path.Combine(Directory.GetCurrentDirectory(), "docLinks.mor");
 
             if (!File.Exists(linksFile))
             {
-                Console.WriteLine("Error: No doclinks.json found in current directory.");
+                Console.WriteLine("Error: No docLinks.mor found in current directory.");
                 Console.WriteLine("Add at least one link first using mortar-cli link.");
                 return;
             }
 
-            Console.WriteLine("Staging doclinks.json...");
+            Console.WriteLine("Staging docLinks.mor...");
             if (!gitService.stageFile(linksFile))
             {
-                Console.WriteLine("Error: Failed to stage doclinks.json.");
+                Console.WriteLine("Error: Failed to stage docLinks.mor.");
                 return;
             }
 
             Console.WriteLine("Committing...");
             if (!gitService.initAndCommit(linksFile))
             {
-                Console.WriteLine("Error: Failed to commit doclinks.json.");
+                Console.WriteLine("Error: Failed to commit docLinks.mor.");
                 Console.WriteLine("Make sure you have set up your Git user name and email.");
                 return;
             }
 
-            Console.WriteLine("Done. doclinks.json is now tracked by Git.");
+            Console.WriteLine("Done. docLinks.mor is now tracked by Git.");
             Console.WriteLine("Team members will see mortar links after pulling.");
         }
 
@@ -76,11 +76,11 @@ namespace mortarCli.commands
                 return;
             }
 
-            string linksFile = Path.Combine(Directory.GetCurrentDirectory(), "doclinks.json");
+            string linksFile = Path.Combine(Directory.GetCurrentDirectory(), "docLinks.mor");
 
             if (!File.Exists(linksFile))
             {
-                Console.WriteLine("No doclinks.json found in current directory.");
+                Console.WriteLine("No docLinks.mor found in current directory.");
                 return;
             }
 
@@ -88,13 +88,13 @@ namespace mortarCli.commands
 
             if (hasChanges)
             {
-                Console.WriteLine("Warning: doclinks.json has uncommitted changes.");
-                Console.WriteLine("Run 'git add doclinks.json && git commit' to share with your team.");
+                Console.WriteLine("Warning: docLinks.mor has uncommitted changes.");
+                Console.WriteLine("Run 'git add docLinks.mor && git commit' to share with your team.");
                 Console.WriteLine("Or run 'mortar-cli git init' if this is your first commit.");
             }
             else
             {
-                Console.WriteLine("doclinks.json is up to date with Git.");
+                Console.WriteLine("docLinks.mor is up to date with Git.");
             }
         }
 
@@ -103,8 +103,8 @@ namespace mortarCli.commands
             Console.WriteLine("Usage: mortar-cli git <subcommand>");
             Console.WriteLine();
             Console.WriteLine("Subcommands:");
-            Console.WriteLine("  init    Stage and commit doclinks.json to Git");
-            Console.WriteLine("  status  Check if doclinks.json has uncommitted changes");
+            Console.WriteLine("  init    Stage and commit docLinks.mor to Git");
+            Console.WriteLine("  status  Check if docLinks.mor has uncommitted changes");
         }
     }
 }

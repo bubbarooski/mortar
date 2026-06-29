@@ -66,7 +66,7 @@ namespace mortarCli
             Console.WriteLine("Notes:");
             Console.WriteLine("  Running a command without required arguments launches interactive mode.");
             Console.WriteLine("  Use silent mode (all args provided) for scripting and CI pipelines.");
-            Console.WriteLine("  Commit doclinks.json to Git to share links across your team.");
+            Console.WriteLine("  Commit docLinks.mor to Git to share links across your team.");
             Console.WriteLine();
             Console.WriteLine("Flags:");
             Console.WriteLine("  --url <url>       Link a web URL instead of or alongside a local file");

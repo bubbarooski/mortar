@@ -50,7 +50,7 @@ namespace mortarCli.services
             try
             {
                 stageFile(filePath);
-                var result = runGitCommand("commit -m \"mortar: initial doclinks.json commit\"");
+                var result = runGitCommand("commit -m \"mortar: initial docLinks.mor commit\"");
                 return result.success;
             }
             catch

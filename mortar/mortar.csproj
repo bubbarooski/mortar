@@ -49,9 +49,9 @@
 		</VisualStudio>
 	</ProjectExtensions>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="taskkill /f /fi &quot;WINDOWTITLE eq *Experimental Instance*&quot; /im devenv.exe 2&gt;nul&#xD;&#xA;rd /s /q &quot;$(TargetDir)&quot; 2&gt;nul&#xD;&#xA;exit 0" />
+		<Exec Command="taskkill /f /fi &quot;WINDOWTITLE eq *Experimental Instance*&quot; /im devenv.exe 2&gt;nul&#xD;&#xA;exit 0" />
 	</Target>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="reg delete &quot;HKCU\Software\Microsoft\VisualStudio\17.0_Exp\Packages&quot; /f 2&gt;nul&#xA;exit 0" />
+		<Exec Command="reg delete &quot;HKCU\Software\Microsoft\VisualStudio\18.0_31869567Exp\Packages&quot; /f 2&gt;nul&#xD;&#xA;rd /s /q &quot;%25LOCALAPPDATA%25\Microsoft\VisualStudio\18.0_31869567Exp\Extensions&quot; 2&gt;nul&#xD;&#xA;rd /s /q &quot;%25LOCALAPPDATA%25\Microsoft\VisualStudio\18.0_31869567Exp\ComponentModelCache&quot; 2&gt;nul&#xD;&#xA;exit 0" />
 	</Target>
 </Project>

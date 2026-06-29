@@ -1,0 +1,71 @@
+[
+  {
+    "sourceFile": "Program.cs",
+    "documentPaths": [
+      {
+        "path": "C:\\Users\\shane\\Desktop\\testInfo.txt",
+        "url": null,
+        "nickname": null,
+        "docType": "datasheet",
+        "notes": null,
+        "isPrimary": false,
+        "outOfDateDetection": true
+      }
+    ],
+    "linkedAt": "2026-06-29T00:59:28.8753031Z"
+  },
+  {
+    "sourceFile": "services\\storageService.cs",
+    "documentPaths": [
+      {
+        "path": "C:\\Users\\shane\\Desktop\\testInfo2.txt",
+        "url": null,
+        "nickname": null,
+        "docType": "schematic",
+        "notes": null,
+        "isPrimary": false,
+        "outOfDateDetection": true
+      },
+      {
+        "path": "C:\\Users\\shane\\Desktop\\testInfo2.txt",
+        "url": null,
+        "nickname": "Test",
+        "docType": null,
+        "notes": null,
+        "isPrimary": false,
+        "outOfDateDetection": true
+      }
+    ],
+    "linkedAt": "2026-06-29T01:01:19.1200100Z"
+  },
+  {
+    "sourceFile": "services\\gitService.cs",
+    "documentPaths": [
+      {
+        "path": "C:\\Users\\shane\\Desktop\\testInfo3.txt",
+        "url": null,
+        "nickname": null,
+        "docType": null,
+        "notes": null,
+        "isPrimary": false,
+        "outOfDateDetection": true
+      }
+    ],
+    "linkedAt": "2026-06-29T01:05:57.8122207Z"
+  },
+  {
+    "sourceFile": "services\\statusService.cs",
+    "documentPaths": [
+      {
+        "path": null,
+        "url": "https://www.google.com",
+        "nickname": null,
+        "docType": null,
+        "notes": null,
+        "isPrimary": false,
+        "outOfDateDetection": true
+      }
+    ],
+    "linkedAt": "2026-06-29T01:11:02.1969994Z"
+  }
+]
