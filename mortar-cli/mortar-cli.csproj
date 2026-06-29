@@ -12,4 +12,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="mortar-cli-tests\**\*" />
+	<None Include="mortar-cli-tests\**\*" />
+  </ItemGroup>
+
 </Project>

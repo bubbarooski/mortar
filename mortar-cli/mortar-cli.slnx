@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="mortar-cli-tests/mortar-cli-tests.csproj" Id="1a72b17c-6953-473a-9ba0-f08fa6a87429" />
   <Project Path="mortar-cli.csproj" />
 </Solution>
