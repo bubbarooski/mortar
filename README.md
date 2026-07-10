@@ -1,4 +1,4 @@
-# mortar
+# mortar - a file linking system
 
 **mortar** links your source files to their documentation — datasheets, schematics, API specs, requirements docs — and surfaces them directly inside Visual Studio.
 
