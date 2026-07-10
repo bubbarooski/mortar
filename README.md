@@ -10,7 +10,7 @@ No more hunting through file explorers or bookmarks. Open a file, see its docs.
 
 mortar adds a tool window to Visual Studio that shows every document linked to your source files. Links are stored in a `doclinks.mor` file at your solution root, which means your whole team shares them automatically through Git.
 
-![mortar tool window](https://github.com/bubbarooski/mortar/raw/main/docs/screenshot.png)
+<img width="377" height="495" alt="Screenshot 2026-07-09 214446" src="https://github.com/user-attachments/assets/a73c4dc1-011f-433b-b2de-fd7d11c73ce9" />
 
 ---
 
