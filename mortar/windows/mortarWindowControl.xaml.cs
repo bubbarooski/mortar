@@ -320,7 +320,6 @@ namespace mortar.windows
             if (originalEditingPath != null && !string.IsNullOrEmpty(path))
             {
                 bool result = pathHelper.pathsEqual(originalEditingPath, path);
-                System.Diagnostics.Debug.WriteLine($"comparing: {originalEditingPath} == {path} ? {result}");
                 return result;
             }
             if (originalEditingUrl != null && !string.IsNullOrEmpty(url))

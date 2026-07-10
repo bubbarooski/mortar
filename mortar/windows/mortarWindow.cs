@@ -12,7 +12,7 @@ namespace mortar.windows
 
         public mortarWindow() : base(null)
         {
-            this.Caption = "mortar: a file linking plugin";
+            this.Caption = "mortar: a file linking system";
             this.Content = new mortarWindowControl();
         }
 
