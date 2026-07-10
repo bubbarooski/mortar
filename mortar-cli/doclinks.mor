@@ -25,15 +25,6 @@
         "notes": null,
         "isPrimary": false,
         "outOfDateDetection": true
-      },
-      {
-        "path": "C:\\Users\\shane\\Desktop\\testInfo2.txt",
-        "url": null,
-        "nickname": "Test",
-        "docType": null,
-        "notes": null,
-        "isPrimary": false,
-        "outOfDateDetection": true
       }
     ],
     "linkedAt": "2026-06-29T01:01:19.1200100Z"
