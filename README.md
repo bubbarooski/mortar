@@ -57,6 +57,12 @@ See [CLI documentation](#cli-reference) below for full usage.
 - Silent mode — pass all arguments for scripting and CI pipelines
 - Git integration — stage and commit `doclinks.mor` in one command
 
+### CLI Installation
+
+1. Download `mortar-cli.exe` from the [latest release](https://github.com/bubbarooski/mortar/releases)
+2. Copy it to a folder in your PATH, or add its location to your PATH
+3. Run `mortar-cli` from your solution root
+
 ---
 
 ## How links are stored
