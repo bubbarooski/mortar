@@ -430,3 +430,6 @@ FodyWeavers.xsd
 mortar/mortar-cli.runtimeconfig.json
 mortar/mortar-cli.dll
 mortar/mortar-cli.exe
+mortar/doclinks.mor
+mortar-cli/doclinks.mor
+mortar/doclinks.json

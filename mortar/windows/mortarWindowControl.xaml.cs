@@ -317,13 +317,15 @@ namespace mortar.windows
 
         private bool isMatchingEditNode(string path, string url)
         {
-            bool result = false;
             if (originalEditingPath != null && !string.IsNullOrEmpty(path))
-                result = pathHelper.pathsEqual(originalEditingPath, path);
-            else if (originalEditingUrl != null && !string.IsNullOrEmpty(url))
-                result = originalEditingUrl == url;
-
-            return result;
+            {
+                bool result = pathHelper.pathsEqual(originalEditingPath, path);
+                System.Diagnostics.Debug.WriteLine($"comparing: {originalEditingPath} == {path} ? {result}");
+                return result;
+            }
+            if (originalEditingUrl != null && !string.IsNullOrEmpty(url))
+                return originalEditingUrl == url;
+            return false;
         }
 
         private bool checkOutOfDate(string sourceFile, string documentPath)
