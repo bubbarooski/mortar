@@ -433,3 +433,5 @@ mortar/mortar-cli.exe
 mortar/doclinks.mor
 mortar-cli/doclinks.mor
 mortar/doclinks.json
+*.mor
+*.json
