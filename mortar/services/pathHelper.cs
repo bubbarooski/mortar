@@ -19,7 +19,7 @@ namespace mortar.services
             catch { return false; }
         }
 
-        public static string normalizePath(string path)
+        public static string? normalizePath(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return null;
@@ -62,7 +62,7 @@ namespace mortar.services
             catch { return fullPath; }
         }
 
-        public static string resolveRelativePath(string basePath, string path)
+        public static string? resolveRelativePath(string basePath, string path)
         {
             if (string.IsNullOrEmpty(path)) return null;
             if (Path.IsPathRooted(path)) return path;

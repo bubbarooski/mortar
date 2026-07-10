@@ -21,14 +21,12 @@ namespace mortar.windows
             base.Initialize();
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            // Subscribe to solution events
             var solution = Microsoft.VisualStudio.Shell.Package
                 .GetGlobalService(typeof(SVsSolution))
                 as IVsSolution;
 
             solution?.AdviseSolutionEvents(this, out _solutionEventsCookie);
 
-            // Try loading immediately in case solution is already open
             TryLoadSolutionDir();
         }
 
@@ -54,7 +52,6 @@ namespace mortar.windows
             }
         }
 
-        // Fires when a solution is opened
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -62,15 +59,13 @@ namespace mortar.windows
             return 0;
         }
 
-        // Fires when a solution is closed
         public int OnAfterCloseSolution(object pUnkReserved)
         {
             var control = (mortarWindowControl)this.Content;
-            control.setSolutionDir(null);
+            control.setSolutionDir(string.Empty);
             return 0;
         }
 
-        // Required interface stubs
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded) => 0;
         public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel) => 0;
         public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved) => 0;
@@ -82,9 +77,10 @@ namespace mortar.windows
 
         protected override void Dispose(bool disposing)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if (disposing && _solutionEventsCookie != 0)
             {
-                ThreadHelper.ThrowIfNotOnUIThread();
                 var solution = Microsoft.VisualStudio.Shell.Package
                     .GetGlobalService(typeof(SVsSolution))
                     as IVsSolution;

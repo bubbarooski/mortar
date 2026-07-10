@@ -8,7 +8,7 @@ namespace mortar.services
 {
     public static class storageService
     {
-        public static List<docLink> loadLinks(string path)
+        public static List<docLink>? loadLinks(string path)
         {
             if (!File.Exists(path))
                 return new List<docLink>();

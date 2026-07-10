@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿#nullable disable
+using Microsoft.VisualStudio.Shell;
 using mortar.models;
 using mortar.services;
 using Newtonsoft.Json;
@@ -18,17 +19,14 @@ namespace mortar.windows
     {
         private string solutionDir;
         private bool showSyncStatus = true;
-        private string editingPath = null;
-        private string editingUrl = null;
         private string originalEditingPath = null;
         private string originalEditingUrl = null;
         private bool pathCleared = false;
         private bool urlCleared = false;
         private HashSet<string> expandedNodes = new HashSet<string>();
+        private HashSet<string> forcedExpandNodes = new HashSet<string>();
         private string addingLinkToSource = null;
         private bool showingHeaderAddForm = false;
-        private Dictionary<string, documentNode> nodeRegistry = new Dictionary<string, documentNode>();
-        private Dictionary<string, sourceFileNode> sourceNodeRegistry = new Dictionary<string, sourceFileNode>();
         public newSourceLinkForm headerLinkForm { get; set; } = new newSourceLinkForm();
 
         public static readonly Dictionary<string, string> docTypeDisplayNames = new Dictionary<string, string>
@@ -72,7 +70,7 @@ namespace mortar.windows
         {
             solutionDir = dir;
             savedBorder.Visibility = Visibility.Collapsed;
-            if (dir != null)
+            if (!string.IsNullOrEmpty(dir))
                 loadLinks();
             else
                 showEmptyState(noSolution: true);
@@ -132,9 +130,10 @@ namespace mortar.windows
                     ? Visibility.Visible
                     : Visibility.Collapsed;
 
-                linksTree.Dispatcher.BeginInvoke(
-                    System.Windows.Threading.DispatcherPriority.Loaded,
-                    new Action(restoreExpansionState));
+                #pragma warning disable VSTHRD001
+                    _ = linksTree.Dispatcher.InvokeAsync(restoreExpansionState,
+                        System.Windows.Threading.DispatcherPriority.Background);
+                #pragma warning restore VSTHRD001
             }
             catch (Exception ex)
             {
@@ -146,8 +145,6 @@ namespace mortar.windows
         private List<folderNode> buildTree(List<docLink> links)
         {
             var folderMap = new Dictionary<string, folderNode>();
-            nodeRegistry.Clear();
-            sourceNodeRegistry.Clear();
 
             foreach (var link in links)
             {
@@ -166,10 +163,10 @@ namespace mortar.windows
                     newLink = new newLinkForm(),
                     tagValue = resolvedSourceFile
                 };
-                sourceNodeRegistry[sourceId] = sourceNode;
 
                 if (!isAddingToThisFile)
                 {
+                    int docIndex = 0;
                     foreach (var doc in link.documentPaths)
                     {
                         bool outOfDate = false;
@@ -192,7 +189,8 @@ namespace mortar.windows
 
                         bool isEditing = isMatchingEditNode(doc.path, doc.url);
 
-                        string docId = $"{link.sourceFile}|{doc.path ?? doc.url ?? doc.nickname ?? Guid.NewGuid().ToString()}";
+                        string docId = $"{link.sourceFile}|{docIndex}|{doc.path ?? doc.url ?? doc.nickname ?? Guid.NewGuid().ToString()}";
+                        docIndex++;
                         var node = new documentNode
                         {
                             nodeId = docId,
@@ -214,8 +212,6 @@ namespace mortar.windows
                             childrenVisibility = isEditing ? "Collapsed" : "Visible",
                             tagValue = !string.IsNullOrEmpty(doc.path) ? $"path:{doc.path}" : $"url:{doc.url}"
                         };
-
-                        nodeRegistry[docId] = node;
 
                         if (!string.IsNullOrWhiteSpace(doc.notes) && !node.isEditing)
                             node.children.Add(new detailNode { text = $"📝 {doc.notes}" });
@@ -308,32 +304,15 @@ namespace mortar.windows
                 menuItem.Parent is ContextMenu contextMenu &&
                 contextMenu.PlacementTarget is FrameworkElement element)
             {
-                System.Diagnostics.Debug.WriteLine($"Tag value: '{element.Tag}'");
                 if (element.Tag is string tag)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Tag string: '{tag}'");
                     if (tag.StartsWith("path:"))
                         return (tag.Substring(5), null);
                     if (tag.StartsWith("url:"))
                         return (null, tag.Substring(4));
                 }
             }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"getIdentifierFromContextMenu failed - sender is MenuItem: {sender is MenuItem}");
-            }
             return (null, null);
-        }
-
-        private sourceFileNode getSourceNodeFromContextMenu(object sender)
-        {
-            if (sender is MenuItem menuItem &&
-                menuItem.Parent is ContextMenu contextMenu &&
-                contextMenu.PlacementTarget is FrameworkElement element &&
-                element.Tag is string nodeId &&
-                sourceNodeRegistry.TryGetValue(nodeId, out var node))
-                return node;
-            return null;
         }
 
         private bool isMatchingEditNode(string path, string url)
@@ -343,11 +322,6 @@ namespace mortar.windows
                 result = pathHelper.pathsEqual(originalEditingPath, path);
             else if (originalEditingUrl != null && !string.IsNullOrEmpty(url))
                 result = originalEditingUrl == url;
-
-            System.Diagnostics.Debug.WriteLine(
-                $"isMatchingEditNode: origPath={originalEditingPath ?? "null"} " +
-                $"origUrl={originalEditingUrl ?? "null"} " +
-                $"docPath={path ?? "null"} docUrl={url ?? "null"} result={result}");
 
             return result;
         }
@@ -403,16 +377,41 @@ namespace mortar.windows
         private void contextMenuEdit(object sender, RoutedEventArgs e)
         {
             var (path, url) = getIdentifierFromContextMenu(sender);
-            System.Diagnostics.Debug.WriteLine($"contextMenuEdit: path={path ?? "null"} url={url ?? "null"}");
-
             if (string.IsNullOrEmpty(path) && string.IsNullOrEmpty(url)) return;
 
             originalEditingPath = path;
             originalEditingUrl = url;
-            editingPath = path;
-            editingUrl = url;
             pathCleared = false;
             urlCleared = false;
+
+            // Find the source file that owns this document and pre-expand it
+            // so the tree doesn't collapse when loadLinks rebuilds
+            var linksFilePath = getLinksFilePath();
+            if (linksFilePath != null)
+            {
+                var links = storageService.loadLinks(linksFilePath);
+                if (links != null)
+                {
+                    foreach (var link in links)
+                    {
+                        bool found = link.documentPaths.Exists(d =>
+                            (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(d.path) &&
+                             pathHelper.pathsEqual(d.path, path)) ||
+                            (!string.IsNullOrEmpty(url) && d.url == url));
+
+                        if (found)
+                        {
+                            string resolvedSource = pathHelper.resolveRelativePath(solutionDir, link.sourceFile);
+                            forcedExpandNodes.Add(resolvedSource);
+                            string folderPath = System.IO.Path.GetDirectoryName(resolvedSource);
+                            if (!string.IsNullOrEmpty(folderPath))
+                                forcedExpandNodes.Add(folderPath);
+                            break;
+                        }
+                    }
+                }
+            }
+
             loadLinks();
         }
 
@@ -535,12 +534,11 @@ namespace mortar.windows
 
         private void resetEditState()
         {
-            editingPath = null;
-            editingUrl = null;
             originalEditingPath = null;
             originalEditingUrl = null;
             pathCleared = false;
             urlCleared = false;
+            forcedExpandNodes.Clear();
         }
 
         private void clearEditPath(object sender, RoutedEventArgs e)
@@ -559,12 +557,6 @@ namespace mortar.windows
 
         private void saveNewLink(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"saveNewLink fired, sender type: {sender?.GetType()?.Name}");
-            if (sender is Button debugBtn)
-            {
-                System.Diagnostics.Debug.WriteLine($"DataContext type: {debugBtn.DataContext?.GetType()?.FullName ?? "null"}");
-            }
-
             if (sender is Button button && button.DataContext is sourceFileNode node)
             {
                 var path = getLinksFilePath();
@@ -600,10 +592,6 @@ namespace mortar.windows
 
                 // Store source file as relative path for portability
                 string relativeSource = pathHelper.makeRelativePath(solutionDir, node.fullPath);
-                System.Diagnostics.Debug.WriteLine($"solutionDir: {solutionDir}");
-                System.Diagnostics.Debug.WriteLine($"node.fullPath: {node.fullPath}");
-                System.Diagnostics.Debug.WriteLine($"relativeSource: {relativeSource}");
-
                 var existing = links.Find(l => pathHelper.pathsEqual(
                     pathHelper.resolveRelativePath(solutionDir, l.sourceFile),
                     node.fullPath));
@@ -655,10 +643,6 @@ namespace mortar.windows
 
         private void saveHeaderLink(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"saveHeaderLink fired");
-            System.Diagnostics.Debug.WriteLine($"solutionDir: {solutionDir}");
-            System.Diagnostics.Debug.WriteLine($"sourceFileValue: {headerLinkForm.sourceFile}");
-
             string sourceFileValue = headerLinkForm.sourceFile?.Trim();
             string newPathValue = headerLinkForm.path?.Trim();
             string newUrlValue = headerLinkForm.url?.Trim();
@@ -833,27 +817,74 @@ namespace mortar.windows
 
         private void restoreExpansionState()
         {
+            _ = linksTree.Dispatcher.InvokeAsync(
+                () => restoreExpansionPass(maxPasses: 10),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void restoreExpansionPass(int maxPasses)
+        {
+            if (maxPasses <= 0) return;
+
+            bool expandedSomething = false;
+
             foreach (var item in getTreeViewItems(linksTree))
             {
+                if (item.DataContext is folderNode fNode &&
+                    (expandedNodes.Contains(fNode.fullPath) || forcedExpandNodes.Contains(fNode.fullPath)))
+                {
+                    if (!item.IsExpanded)
+                    {
+                        item.IsExpanded = true;
+                        expandedSomething = true;
+                    }
+                }
+
                 if (item.DataContext is sourceFileNode sNode &&
-                    expandedNodes.Contains(sNode.fullPath))
-                    item.IsExpanded = true;
-                else if (item.DataContext is folderNode fNode &&
-                    expandedNodes.Contains(fNode.fullPath))
-                    item.IsExpanded = true;
+                    (expandedNodes.Contains(sNode.fullPath) || forcedExpandNodes.Contains(sNode.fullPath)))
+                {
+                    if (!item.IsExpanded)
+                    {
+                        item.IsExpanded = true;
+                        expandedSomething = true;
+                    }
+                }
 
                 if (item.DataContext is documentNode docNode && docNode.isEditing)
                 {
-                    item.IsExpanded = true;
                     var parent = getParentTreeViewItem(item);
-                    if (parent != null)
+                    if (parent != null && !parent.IsExpanded)
                     {
                         parent.IsExpanded = true;
+                        expandedSomething = true;
+                    }
+                    if (parent != null)
+                    {
                         var grandParent = getParentTreeViewItem(parent);
-                        if (grandParent != null)
+                        if (grandParent != null && !grandParent.IsExpanded)
+                        {
                             grandParent.IsExpanded = true;
+                            expandedSomething = true;
+                        }
+                        if (grandParent != null)
+                        {
+                            var greatGrandParent = getParentTreeViewItem(grandParent);
+                            if (greatGrandParent != null && !greatGrandParent.IsExpanded)
+                            {
+                                greatGrandParent.IsExpanded = true;
+                                expandedSomething = true;
+                            }
+                        }
                     }
                 }
+            }
+
+            // If something was expanded, queue another pass to catch newly visible children
+            if (expandedSomething)
+            {
+                _ = linksTree.Dispatcher.InvokeAsync(
+                    () => restoreExpansionPass(maxPasses - 1),
+                    System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
@@ -922,31 +953,13 @@ namespace mortar.windows
                 var links = storageService.loadLinks(path);
                 if (links == null) return;
 
-                links.RemoveAll(l => pathHelper.pathsEqual(l.sourceFile, sourceFile));
+                links.RemoveAll(l => pathHelper.pathsEqual(
+                    pathHelper.resolveRelativePath(solutionDir, l.sourceFile),
+                    sourceFile));
 
                 storageService.saveLinks(path, links);
                 loadLinks();
             }
-        }
-    }
-
-    public class docTypeDisplayConverter : System.Windows.Data.IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value is string key && mortarWindowControl.docTypeDisplayNames.ContainsKey(key))
-                return mortarWindowControl.docTypeDisplayNames[key];
-            return value ?? "";
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value is string display)
-            {
-                foreach (var kvp in mortarWindowControl.docTypeDisplayNames)
-                    if (kvp.Value == display) return kvp.Key;
-            }
-            return value ?? "";
         }
     }
 }

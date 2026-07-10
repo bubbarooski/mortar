@@ -7,7 +7,7 @@
         "url": null,
         "nickname": null,
         "docType": "datasheet",
-        "notes": null,
+        "notes": "i am adding notes here",
         "isPrimary": false,
         "outOfDateDetection": true
       }
@@ -59,7 +59,7 @@
       {
         "path": null,
         "url": "https://www.google.com",
-        "nickname": null,
+        "nickname": "Google website",
         "docType": null,
         "notes": null,
         "isPrimary": false,

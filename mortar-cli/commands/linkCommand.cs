@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable disable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using mortarCli.models;
@@ -11,6 +12,7 @@ namespace mortarCli.commands
     {
         public static void execute(string[] args)
         {
+            // Parse positional arguments
             string sourceFile = args.Length > 1 ? args[1] : null;
             string documentPath = args.Length > 2 && !args[2].StartsWith("--") ? args[2] : null;
             string url = null;
@@ -21,7 +23,7 @@ namespace mortarCli.commands
             bool outOfDateDetection = true;
             int flagStart = documentPath != null ? 3 : 2;
 
-            // Parse flags from args
+            // Parse optional flags
             for (int i = flagStart; i < args.Length; i++)
             {
                 switch (args[i].ToLower())
@@ -58,7 +60,7 @@ namespace mortarCli.commands
                 }
             }
 
-            // Interactive mode for missing required fields
+            // Interactive mode — prompt for any missing required fields
             if (string.IsNullOrEmpty(sourceFile))
             {
                 Console.Write("Source file: ");
@@ -110,7 +112,7 @@ namespace mortarCli.commands
                 if (syncInput == "n") outOfDateDetection = false;
             }
 
-            // Validate
+            // Validate paths and inputs
             string sourceNormalized = pathHelper.normalizePath(sourceFile);
             if (sourceNormalized == null)
             {
@@ -158,6 +160,7 @@ namespace mortarCli.commands
                 return;
             }
 
+            // Warn if files don't exist yet — not a hard error since they may be created later
             if (!File.Exists(sourceNormalized))
                 Console.WriteLine($"Warning: Source file does not exist: {sourceNormalized}");
 
@@ -167,17 +170,20 @@ namespace mortarCli.commands
             var links = storageService.loadLinks();
             if (links == null) return;
 
-            // Convert source to relative path for portability
+            // Store source file as relative path so links are portable across machines
             string solutionRoot = Directory.GetCurrentDirectory();
             string sourceRelative = pathHelper.makeRelativePath(solutionRoot, sourceNormalized);
 
+            // Resolve existing entries to absolute before comparing
             var existing = links.Find(l =>
             {
                 string resolvedExisting = pathHelper.resolveRelativePath(solutionRoot, l.sourceFile);
                 return pathHelper.pathsEqual(resolvedExisting, sourceNormalized);
             });
+
             if (existing != null)
             {
+                // Duplicate checks before adding to existing source file entry
                 if (!string.IsNullOrEmpty(docNormalized) &&
                     existing.documentPaths.Exists(d =>
                         !string.IsNullOrEmpty(d.path) &&
@@ -208,6 +214,7 @@ namespace mortarCli.commands
             }
             else
             {
+                // New source file entry
                 links.Add(new docLink
                 {
                     sourceFile = sourceRelative,

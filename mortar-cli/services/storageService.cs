@@ -14,7 +14,7 @@ namespace mortarCli.services
         }
 
         // Original — used by all CLI commands
-        public static List<docLink> loadLinks()
+        public static List<docLink>? loadLinks()
         {
             return loadLinks(getLinksFilePath());
         }
@@ -25,7 +25,7 @@ namespace mortarCli.services
         }
 
         // Overloads — used by tests
-        public static List<docLink> loadLinks(string path)
+        public static List<docLink>? loadLinks(string path)
         {
             if (!File.Exists(path))
                 return new List<docLink>();
