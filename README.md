@@ -27,6 +27,11 @@ mortar adds a tool window to Visual Studio that shows every document linked to y
 
 The CLI lets you manage links from the terminal, useful for scripting or if you prefer the command line.
 
+**Installation:**
+1. Download `mortar-cli.exe` from the [latest release](https://github.com/bubbarooski/mortar/releases/latest)
+2. Copy it to a folder in your PATH
+3. Run from your solution root
+
 ```
 mortar-cli link <sourceFile> <documentPath>
 mortar-cli link <sourceFile> --url <url>
@@ -56,6 +61,12 @@ See [CLI documentation](#cli-reference) below for full usage.
 - Interactive mode — run any command without arguments to be prompted
 - Silent mode — pass all arguments for scripting and CI pipelines
 - Git integration — stage and commit `doclinks.mor` in one command
+
+### CLI Installation
+
+1. Download `mortar-cli.exe` from the [latest release](https://github.com/bubbarooski/mortar/releases)
+2. Copy it to a folder in your PATH, or add its location to your PATH
+3. Run `mortar-cli` from your solution root
 
 ---
 
