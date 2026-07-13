@@ -1,8 +1,13 @@
-# mortar - a file linking system
+# mortar
 
 **mortar** links your source files to their documentation — datasheets, schematics, API specs, requirements docs — and surfaces them directly inside Visual Studio.
 
 No more hunting through file explorers or bookmarks. Open a file, see its docs.
+
+[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Marketplace-mortar-blue?logo=visual-studio)](https://marketplace.visualstudio.com/items?itemName=bubbarooski.mortar)
+[![GitHub release](https://img.shields.io/github/v/release/bubbarooski/mortar?label=CLI)](https://github.com/bubbarooski/mortar/releases/latest)
+
+---
 
 ---
 
@@ -18,7 +23,7 @@ mortar adds a tool window to Visual Studio that shows every document linked to y
 
 ### Visual Studio Extension
 
-1. Install the mortar extension from the Visual Studio Marketplace *(coming soon)*
+1. Install directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=bubbarooski.mortar) or search for **mortar** in Visual Studio under **Extensions > Manage Extensions**.
 2. Open any solution in Visual Studio
 3. Go to **View > Other Windows > mortar** to open the tool window
 4. Right-click any source file in the tree to add a link, or use **+ Track File** to start tracking a new file
