@@ -46,6 +46,7 @@ See [CLI documentation](#cli-reference) below for full usage.
 ## Features
 
 ### Visual Studio Extension
+- **Hyperlinked** — click on a link to open the file or website that makes up that link
 - **Folder tree view** — source files are grouped by directory, mirroring your project structure
 - **Inline editing** — edit links directly in the tool window without leaving the IDE
 - **Add links from the GUI** — right-click any tracked file to add a new document link, or use **+ Track File** to track a new file
@@ -161,3 +162,5 @@ dotnet test
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+This readme was generated using Claude!
