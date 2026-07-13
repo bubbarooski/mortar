@@ -1,12 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="mortar.bdb500de-d822-4438-a448-09ed3079a192" Version="1.0" Language="en-US" Publisher="mortar" />
+    <Identity Id="mortar.bdb500de-d822-4438-a448-09ed3079a192" Version="1.1" Language="en-US" Publisher="Shane Donnelly" />
     <DisplayName>mortar</DisplayName>
-    <Description>Empty VSIX Project.</Description>
+    <Description>Link your source files to their documentation — datasheets, schematics, API specs, requirements — and surface them directly inside Visual Studio. Links are shared across your team via Git.</Description>
+    <Tags>documentation, embedded, hardware, linker, productivity</Tags>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.14, )">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Id="Microsoft.VisualStudio.Professional" Version="[17.14, )">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.14, )">
       <ProductArchitecture>amd64</ProductArchitecture>
     </InstallationTarget>
   </Installation>
